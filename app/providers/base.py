@@ -1,9 +1,12 @@
+import time
 from abc import ABC, abstractmethod
+from decimal import Decimal
 from typing import Optional
+
+import httpx
+
 from app.models.request import ExchangeRequest
 from app.models.response import ExchangeResponse
-import time
-import httpx
 from app.utils.logger import setup_logger
 
 
@@ -22,12 +25,15 @@ class BaseExchangeProvider(ABC):
 
             if result:
                 response_time = int((time.time() - start_time) * 1000)
+                converted_amount = Decimal(str(result))
+                rate = converted_amount / request.amount
+
                 return ExchangeResponse(
                     source_currency=request.source_currency,
                     target_currency=request.target_currency,
                     amount=request.amount,
-                    converted_amount=result,
-                    rate=result / request.amount,
+                    converted_amount=converted_amount,
+                    rate=rate,
                     provider=self.name,
                     response_time_ms=response_time
                 )

@@ -1,35 +1,41 @@
-import httpx
+import asyncio
+import random
 from typing import Optional
-from app.providers.base import BaseExchangeProvider
-from app.models.request import ExchangeRequest
+
 from app.config.settings import settings
+from app.models.request import ExchangeRequest
+from app.providers.base import BaseExchangeProvider
 
 
 class API2Provider(BaseExchangeProvider):
     def __init__(self):
         super().__init__("API2", settings.REQUEST_TIMEOUT)
-        self.url = settings.API2_URL
-        self.api_key = settings.API2_API_KEY
+
+        self.sample_rates = {
+            ("USD", "EUR"): 0.87,
+            ("USD", "GBP"): 0.74,
+            ("USD", "JPY"): 111.5,
+            ("EUR", "USD"): 1.15,
+            ("EUR", "GBP"): 0.85,
+            ("GBP", "USD"): 1.35,
+            ("GBP", "EUR"): 1.18,
+            ("JPY", "USD"): 0.0089,
+        }
 
     async def _make_request(self, request: ExchangeRequest) -> Optional[float]:
-        async with self._create_client() as client:
-            xml_payload = f"""<XML>
-                <From>{request.source_currency}</From>
-                <To>{request.target_currency}</To>
-                <Amount>{request.amount}</Amount>
-                <ApiKey>{self.api_key}</ApiKey>
-            </XML>"""
+        await asyncio.sleep(random.uniform(0.2, 0.5))
 
-            headers = {"Content-Type": "application/xml"}
+        rate_key = (request.source_currency, request.target_currency)
 
-            response = await client.post(self.url, content=xml_payload, headers=headers)
-            response.raise_for_status()
+        if rate_key in self.sample_rates:
+            base_rate = self.sample_rates[rate_key]
+            variation = random.uniform(-0.015, 0.015)
+            rate = base_rate * (1 + variation)
 
-            content = response.text
-            start = content.find("<Result>") + 8
-            end = content.find("</Result>")
+            converted_amount = rate * float(request.amount)
+            self.logger.info(f"API2 Mock (XML) - Amount: {converted_amount} for {rate_key}")
+            return converted_amount
 
-            if start > 7 and end > start:
-                return float(content[start:end])
-
-            return None
+        self.logger.warning(f"API2 - Unsupported currency pair: {rate_key}")
+        raise ValueError(
+            f"Currency conversion from {request.source_currency} to {request.target_currency} is not supported by API2")
