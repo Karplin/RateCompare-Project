@@ -1,4 +1,5 @@
 import asyncio
+
 from app.models.request import ExchangeRequest
 from app.models.response import BestExchangeResponse
 from app.providers.api1_provider import API1Provider
@@ -15,6 +16,7 @@ class ExchangeService:
             API3Provider()
         ]
         self.logger = setup_logger(__name__)
+        self.logger.info("ExchangeService initialized with mock data providers")
 
     async def get_best_exchange_rate(self, request: ExchangeRequest) -> BestExchangeResponse:
         self.logger.info(
@@ -40,7 +42,11 @@ class ExchangeService:
                 failed_count += 1
 
         if not successful_offers:
-            raise ValueError("No providers returned valid exchange rates")
+            if failed_count == len(self.providers):
+                raise ValueError(
+                    "All providers failed to provide exchange rates. Please check currency codes and try again.")
+            else:
+                raise ValueError("No providers returned valid exchange rates")
 
         best_offer = max(successful_offers, key=lambda x: x.converted_amount)
 
