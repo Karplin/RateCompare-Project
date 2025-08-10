@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from decimal import Decimal
 
+
 class ExchangeResponse(BaseModel):
     source_currency: str
     target_currency: str
@@ -9,6 +10,7 @@ class ExchangeResponse(BaseModel):
     rate: Decimal
     provider: str
     response_time_ms: int
+
 
 class BestExchangeResponse(BaseModel):
     best_offer: ExchangeResponse
