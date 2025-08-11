@@ -1,18 +1,79 @@
 version: '3.8'
 
 services:
-  ratecompare:
-    build: .
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.gateway
     ports:
       - "8000:8000"
     environment:
-      - REQUEST_TIMEOUT=10
       - LOG_LEVEL=INFO
-    volumes:
-      - .:/app
+    networks:
+      - ratecompare-network
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
       interval: 30s
       timeout: 10s
       retries: 3
+
+  # Endpoint Exchange Rate Compare
+  exchange-compare:
+    build:
+      context: .
+      dockerfile: Dockerfile.endpoint
+    ports:
+      - "8001:8001"
+    environment:
+      - ENDPOINT_TYPE=exchange_compare
+      - LOG_LEVEL=INFO
+    networks:
+      - ratecompare-network
+    restart: unless-stopped
+
+  # Endpoint API1 (JSON)
+  api1-endpoint:
+    build:
+      context: .
+      dockerfile: Dockerfile.endpoint
+    ports:
+      - "8002:8002"
+    environment:
+      - ENDPOINT_TYPE=api1
+      - LOG_LEVEL=INFO
+    networks:
+      - ratecompare-network
+    restart: unless-stopped
+
+  # Endpoint API2 (XML)
+  api2-endpoint:
+    build:
+      context: .
+      dockerfile: Dockerfile.endpoint
+    ports:
+      - "8003:8003"
+    environment:
+      - ENDPOINT_TYPE=api2
+      - LOG_LEVEL=INFO
+    networks:
+      - ratecompare-network
+    restart: unless-stopped
+
+  # Endpoint API3 (JSON)
+  api3-endpoint:
+    build:
+      context: .
+      dockerfile: Dockerfile.endpoint
+    ports:
+      - "8004:8004"
+    environment:
+      - ENDPOINT_TYPE=api3
+      - LOG_LEVEL=INFO
+    networks:
+      - ratecompare-network
+    restart: unless-stopped
+
+networks:
+  ratecompare-network:
+    driver: bridge

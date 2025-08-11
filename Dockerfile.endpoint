@@ -1,0 +1,40 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY app/ ./app/
+
+RUN echo '#!/bin/bash\n\
+case "$ENDPOINT_TYPE" in\n\
+    "exchange_compare")\n\
+        echo "Starting Exchange Compare Endpoint on port 8001..."\n\
+        uvicorn app.main:app --host 0.0.0.0 --port 8001\n\
+        ;;\n\
+    "api1")\n\
+        echo "Starting API1 Endpoint on port 8002..."\n\
+        uvicorn app.main:app --host 0.0.0.0 --port 8002\n\
+        ;;\n\
+    "api2")\n\
+        echo "Starting API2 Endpoint on port 8003..."\n\
+        uvicorn app.main:app --host 0.0.0.0 --port 8003\n\
+        ;;\n\
+    "api3")\n\
+        echo "Starting API3 Endpoint on port 8004..."\n\
+        uvicorn app.main:app --host 0.0.0.0 --port 8004\n\
+        ;;\n\
+    *)\n\
+        echo "Unknown endpoint type: $ENDPOINT_TYPE"\n\
+        exit 1\n\
+        ;;\n\
+esac' > /app/start.sh && chmod +x /app/start.sh
+
+EXPOSE 8001 8002 8003 8004
+
+CMD ["/app/start.sh"]
