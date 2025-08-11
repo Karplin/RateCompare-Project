@@ -1,14 +1,27 @@
 version: '3.8'
 
+networks:
+  ratecompare-network:
+    driver: bridge
+
 services:
   api-gateway:
     build:
       context: .
-      dockerfile: Dockerfile.gateway
+      dockerfile: services/api-gateway/Dockerfile
     ports:
       - "8000:8000"
     environment:
       - LOG_LEVEL=INFO
+      - API1_URL=http://api1:8002
+      - API2_URL=http://api2:8003
+      - API3_URL=http://api3:8004
+      - EXCHANGE_URL=http://exchange-service:8001
+    depends_on:
+      - api1
+      - api2
+      - api3
+      - exchange-service
     networks:
       - ratecompare-network
     restart: unless-stopped
@@ -18,62 +31,77 @@ services:
       timeout: 10s
       retries: 3
 
-  # Endpoint Exchange Rate Compare
-  exchange-compare:
+  exchange-service:
     build:
       context: .
-      dockerfile: Dockerfile.endpoint
+      dockerfile: services/exchange-service/Dockerfile
     ports:
       - "8001:8001"
     environment:
-      - ENDPOINT_TYPE=exchange_compare
       - LOG_LEVEL=INFO
+      - API1_URL=http://api1:8002
+      - API2_URL=http://api2:8003
+      - API3_URL=http://api3:8004
+    depends_on:
+      - api1
+      - api2
+      - api3
     networks:
       - ratecompare-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  # Endpoint API1 (JSON)
-  api1-endpoint:
+  api1:
     build:
       context: .
-      dockerfile: Dockerfile.endpoint
+      dockerfile: services/api1/Dockerfile
     ports:
       - "8002:8002"
     environment:
-      - ENDPOINT_TYPE=api1
       - LOG_LEVEL=INFO
     networks:
       - ratecompare-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  # Endpoint API2 (XML)
-  api2-endpoint:
+  api2:
     build:
       context: .
-      dockerfile: Dockerfile.endpoint
+      dockerfile: services/api2/Dockerfile
     ports:
       - "8003:8003"
     environment:
-      - ENDPOINT_TYPE=api2
       - LOG_LEVEL=INFO
     networks:
       - ratecompare-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  # Endpoint API3 (JSON)
-  api3-endpoint:
+  api3:
     build:
       context: .
-      dockerfile: Dockerfile.endpoint
+      dockerfile: services/api3/Dockerfile
     ports:
       - "8004:8004"
     environment:
-      - ENDPOINT_TYPE=api3
       - LOG_LEVEL=INFO
     networks:
       - ratecompare-network
     restart: unless-stopped
-
-networks:
-  ratecompare-network:
-    driver: bridge
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

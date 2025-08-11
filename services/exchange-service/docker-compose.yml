@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  exchange-service:
+    build:
+      context: ../../
+      dockerfile: services/exchange-service/Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - LOG_LEVEL=INFO
+      - API1_URL=http://api1:8002
+      - API2_URL=http://api2:8003
+      - API3_URL=http://api3:8004
+    restart: unless-stopped
+    networks:
+      - ratecompare-network
+
+networks:
+  ratecompare-network:
+    driver: bridge
