@@ -3,18 +3,24 @@ from decimal import Decimal
 
 
 class ExchangeResponse(BaseModel):
-    source_currency: str
-    target_currency: str
+    sourceCurrency: str
+    targetCurrency: str
     amount: Decimal
-    converted_amount: Decimal
+    convertedAmount: Decimal
     rate: Decimal
     provider: str
-    response_time_ms: int
+    responseTimeMs: int
+
+
+class ComparisonData(BaseModel):
+    bestOffer: ExchangeResponse
+    allOffers: list[ExchangeResponse]
+    totalProvidersQueried: int
+    successfulProviders: int
+    failedProviders: int
 
 
 class BestExchangeResponse(BaseModel):
-    best_offer: ExchangeResponse
-    all_offers: list[ExchangeResponse]
-    total_providers_queried: int
-    successful_providers: int
-    failed_providers: int
+    statusCode: int
+    message: str
+    data: ComparisonData

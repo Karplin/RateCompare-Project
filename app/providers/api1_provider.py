@@ -1,15 +1,15 @@
 import asyncio
 import random
-from typing import Optional
+from decimal import Decimal
 
-from app.config.settings import settings
-from app.models.request import ExchangeRequest
-from app.providers.base import BaseExchangeProvider
+from app.models.api_formats import API1Request, API1Response
+from app.utils.logger import setup_logger
 
 
-class API1Provider(BaseExchangeProvider):
+class API1DirectProvider:
     def __init__(self):
-        super().__init__("API1", settings.REQUEST_TIMEOUT)
+        self.name = "API1"
+        self.logger = setup_logger(f"{__name__}.{self.name}_Direct")
 
         self.sample_rates = {
             ("USD", "EUR"): 0.85,
@@ -22,20 +22,19 @@ class API1Provider(BaseExchangeProvider):
             ("JPY", "USD"): 0.009,
         }
 
-    async def _make_request(self, request: ExchangeRequest) -> Optional[float]:
+    async def get_exchange_rate(self, request: API1Request) -> API1Response:
         await asyncio.sleep(random.uniform(0.1, 0.3))
 
-        rate_key = (request.source_currency, request.target_currency)
+        rate_key = (request.from_, request.to)
 
         if rate_key in self.sample_rates:
             base_rate = self.sample_rates[rate_key]
             variation = random.uniform(-0.02, 0.02)
             rate = base_rate * (1 + variation)
 
-            self.logger.info(f"API1 Mock - Rate: {rate} for {rate_key}")
-            converted_amount = rate * float(request.amount)
-            return converted_amount
+            self.logger.info(f"API1 - Rate: {rate} for {rate_key}")
+
+            return API1Response(rate=Decimal(str(rate)))
 
         self.logger.warning(f"API1 - Unsupported currency pair: {rate_key}")
-        raise ValueError(
-            f"Currency conversion from {request.source_currency} to {request.target_currency} is not supported by API1")
+        raise ValueError(f"Currency conversion from {request.from_} to {request.to} is not supported by API1")
