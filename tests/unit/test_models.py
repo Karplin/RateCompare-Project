@@ -3,7 +3,7 @@ from decimal import Decimal
 import pytest
 from pydantic import ValidationError
 
-from app.models.request import ExchangeRequest
+from common.models.request import ExchangeRequest
 
 
 class TestModels:

@@ -2,8 +2,8 @@ from decimal import Decimal
 
 import pytest
 
-from app.models.request import ExchangeRequest
-from app.services.exchange_service import ExchangeService
+from common.models.request import ExchangeRequest
+from common.services.exchange_service import ExchangeService
 
 
 @pytest.fixture
@@ -37,7 +37,7 @@ class TestExchangeService:
                 self.converted_amount = converted_amount
 
             async def get_exchange_rate(self, request):
-                from app.models.api_formats import API1Response
+                from common.models.api_formats import API1Response
                 rate = Decimal(str(self.converted_amount)) / sample_request.amount
                 return API1Response(rate=rate)
 
@@ -47,7 +47,7 @@ class TestExchangeService:
                 self.converted_amount = converted_amount
 
             async def get_exchange_rate(self, request):
-                from app.models.api_formats import API2Response
+                from common.models.api_formats import API2Response
                 return API2Response(Result=Decimal(str(self.converted_amount)))
 
         class MockAPI3Provider:
@@ -56,7 +56,7 @@ class TestExchangeService:
                 self.converted_amount = converted_amount
 
             async def get_exchange_rate(self, request):
-                from app.models.api_formats import API3Response, API3DataResponse
+                from common.models.api_formats import API3Response, API3DataResponse
                 return API3Response(
                     statusCode=200,
                     message="Success",
@@ -90,7 +90,7 @@ class TestExchangeService:
                 if self.should_fail:
                     raise Exception("API unavailable")
 
-                from app.models.api_formats import API1Response
+                from common.models.api_formats import API1Response
                 rate = Decimal(str(self.converted_amount)) / sample_request.amount
                 return API1Response(rate=rate)
 
@@ -104,7 +104,7 @@ class TestExchangeService:
                 if self.should_fail:
                     raise Exception("API unavailable")
 
-                from app.models.api_formats import API2Response
+                from common.models.api_formats import API2Response
                 return API2Response(Result=Decimal(str(self.converted_amount)))
 
         class MockAPI3Provider:
@@ -117,7 +117,7 @@ class TestExchangeService:
                 if self.should_fail:
                     raise Exception("API unavailable")
 
-                from app.models.api_formats import API3Response, API3DataResponse
+                from common.models.api_formats import API3Response, API3DataResponse
                 return API3Response(
                     statusCode=200,
                     message="Success",

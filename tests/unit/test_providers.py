@@ -1,13 +1,13 @@
 from decimal import Decimal
 import pytest
-from app.models.api_formats import (
+from common.models.api_formats import (
     API1Request, API1Response,
     API2Request, API2Response, 
     API3Request, API3Response, API3ExchangeData
 )
-from app.providers.api1_provider import API1DirectProvider
-from app.providers.api2_provider import API2DirectProvider
-from app.providers.api3_provider import API3DirectProvider
+from common.providers.api1_provider import API1DirectProvider
+from common.providers.api2_provider import API2DirectProvider
+from common.providers.api3_provider import API3DirectProvider
 
 
 @pytest.fixture
