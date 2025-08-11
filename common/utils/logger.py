@@ -1,6 +1,6 @@
 import logging
 import sys
-from app.config.settings import settings
+from common.config.settings import settings
 
 
 def setup_logger(name: str) -> logging.Logger:

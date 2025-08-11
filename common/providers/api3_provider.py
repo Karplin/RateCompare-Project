@@ -2,8 +2,8 @@ import asyncio
 import random
 from decimal import Decimal
 
-from app.models.api_formats import API3Request, API3Response, API3DataResponse
-from app.utils.logger import setup_logger
+from common.models.api_formats import API3Request, API3Response, API3DataResponse
+from common.utils.logger import setup_logger
 
 
 class API3DirectProvider:

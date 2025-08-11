@@ -2,18 +2,18 @@ import asyncio
 import time
 from typing import Optional
 
-from app.models.api_formats import (
+from common.models.api_formats import (
     API1Request, API1Response,
     API2Request, API2Response,
     API3Request, API3Response,
     API3ExchangeData
 )
-from app.models.request import ExchangeRequest
-from app.models.response import ExchangeResponse, BestExchangeResponse, ComparisonData
-from app.providers.api1_provider import API1DirectProvider
-from app.providers.api2_provider import API2DirectProvider
-from app.providers.api3_provider import API3DirectProvider
-from app.utils.logger import setup_logger
+from common.models.request import ExchangeRequest
+from common.models.response import ExchangeResponse, BestExchangeResponse, ComparisonData
+from common.providers.api1_provider import API1DirectProvider
+from common.providers.api2_provider import API2DirectProvider
+from common.providers.api3_provider import API3DirectProvider
+from common.utils.logger import setup_logger
 
 
 class ExchangeService:
