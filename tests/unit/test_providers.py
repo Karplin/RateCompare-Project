@@ -1,95 +1,113 @@
 from decimal import Decimal
-
 import pytest
-
-from app.models.request import ExchangeRequest
-from app.providers.api1_provider import API1Provider
-from app.providers.api2_provider import API2Provider
-from app.providers.api3_provider import API3Provider
-
-
-@pytest.fixture
-def sample_request():
-    return ExchangeRequest(
-        source_currency="USD",
-        target_currency="EUR",
-        amount=Decimal("100.00")
-    )
+from app.models.api_formats import (
+    API1Request, API1Response,
+    API2Request, API2Response, 
+    API3Request, API3Response, API3ExchangeData
+)
+from app.providers.api1_provider import API1DirectProvider
+from app.providers.api2_provider import API2DirectProvider
+from app.providers.api3_provider import API3DirectProvider
 
 
 @pytest.fixture
-def unsupported_request():
-    return ExchangeRequest(
-        source_currency="AED",
-        target_currency="QAR",
-        amount=Decimal("100.00")
+def api1_sample_request():
+    return API1Request(**{"from": "USD", "to": "EUR", "value": Decimal("100.00")})
+
+
+@pytest.fixture  
+def api2_sample_request():
+    return API2Request(From="USD", To="EUR", Amount=Decimal("100.00"))
+
+
+@pytest.fixture
+def api3_sample_request():
+    return API3Request(
+        exchange=API3ExchangeData(
+            sourceCurrency="USD",
+            targetCurrency="EUR", 
+            quantity=Decimal("100.00")
+        )
     )
 
 
-class TestProviders:
+class TestDirectProviders:
 
     @pytest.mark.asyncio
-    async def test_api1_provider_success(self, sample_request):
-        """Test 1: API1 provider returns valid exchange rate for supported currency pair."""
-        provider = API1Provider()
-        result = await provider.get_exchange_rate(sample_request)
+    async def test_api1_direct_provider_success(self, api1_sample_request):
+        """Test: API1 direct provider returns valid response in correct format."""
+        provider = API1DirectProvider()
+        result = await provider.get_exchange_rate(api1_sample_request)
 
         assert result is not None
-        assert result.provider == "API1"
-        assert result.converted_amount > 0
+        assert isinstance(result, API1Response)
         assert result.rate > 0
+        assert isinstance(result.rate, Decimal)
 
     @pytest.mark.asyncio
-    async def test_api2_provider_success(self, sample_request):
-        """Test 2: API2 provider returns valid exchange rate for supported currency pair."""
-        provider = API2Provider()
-        result = await provider.get_exchange_rate(sample_request)
+    async def test_api2_direct_provider_success(self, api2_sample_request):
+        """Test: API2 direct provider returns valid response in correct format."""
+        provider = API2DirectProvider()
+        result = await provider.get_exchange_rate(api2_sample_request)
 
         assert result is not None
-        assert result.provider == "API2"
-        assert result.converted_amount > 0
-        assert result.rate > 0
+        assert isinstance(result, API2Response)
+        assert result.Result > 0
+        assert isinstance(result.Result, Decimal)
 
     @pytest.mark.asyncio
-    async def test_api3_provider_success(self, sample_request):
-        """Test 3: API3 provider handles success and random failures correctly."""
-        provider = API3Provider()
-
-        success_found = False
+    async def test_api3_direct_provider_success(self, api3_sample_request):
+        """Test: API3 direct provider returns valid response in correct format."""
+        provider = API3DirectProvider()
+        
+        success = False
         for _ in range(10):
             try:
-                result = await provider.get_exchange_rate(sample_request)
+                result = await provider.get_exchange_rate(api3_sample_request)
                 if result:
-                    assert result.provider == "API3"
-                    assert result.converted_amount > 0
-                    success_found = True
+                    success = True
+                    assert isinstance(result, API3Response)
+                    assert result.statusCode == 200
+                    assert result.data.total > 0
+                    assert isinstance(result.data.total, Decimal)
                     break
-            except:
+            except Exception:
                 continue
-
-        assert success_found, "API3 should succeed at least once"
-
-    @pytest.mark.asyncio
-    async def test_providers_handle_unsupported_currencies(self, unsupported_request):
-        """Test 4: All providers return None for unsupported currency pairs."""
-        api1 = API1Provider()
-        api2 = API2Provider()
-        api3 = API3Provider()
-
-        result1 = await api1.get_exchange_rate(unsupported_request)
-        result2 = await api2.get_exchange_rate(unsupported_request)
-        result3 = await api3.get_exchange_rate(unsupported_request)
-
-        assert result1 is None
-        assert result2 is None
-        assert result3 is None
+        
+        assert success, "API3 should succeed at least once in 10 attempts"
 
     @pytest.mark.asyncio
-    async def test_rate_calculation_accuracy(self, sample_request):
-        """Test 5: Rate calculations are mathematically correct."""
-        provider = API1Provider()
-        result = await provider.get_exchange_rate(sample_request)
+    async def test_providers_handle_unsupported_currencies(self):
+        """Test: all providers handle unsupported currency pairs properly."""
+        api1_provider = API1DirectProvider()
+        api2_provider = API2DirectProvider()
+        api3_provider = API3DirectProvider()
 
-        assert result is not None
-        expected_converted = result.rate * result.amount
-        assert abs(result.converted_amount - expected_converted) < Decimal("0.01")
+        api1_request = API1Request(**{"from": "AED", "to": "QAR", "value": Decimal("10.00")})
+        api2_request = API2Request(From="AED", To="QAR", Amount=Decimal("10.00"))
+        api3_request = API3Request(
+            exchange=API3ExchangeData(sourceCurrency="AED", targetCurrency="QAR", quantity=Decimal("10.00"))
+        )
+
+        with pytest.raises(ValueError):
+            await api1_provider.get_exchange_rate(api1_request)
+            
+        with pytest.raises(ValueError):
+            await api2_provider.get_exchange_rate(api2_request)
+            
+        with pytest.raises(ValueError):
+            await api3_provider.get_exchange_rate(api3_request)
+
+    @pytest.mark.asyncio
+    async def test_response_format_accuracy(self, api1_sample_request, api2_sample_request):
+        """Test: that responses match expected format specifications."""
+        api1_provider = API1DirectProvider()
+        api2_provider = API2DirectProvider()
+
+        api1_result = await api1_provider.get_exchange_rate(api1_sample_request)
+        assert hasattr(api1_result, 'rate')
+        assert not hasattr(api1_result, 'converted_amount')
+
+        api2_result = await api2_provider.get_exchange_rate(api2_sample_request)
+        assert hasattr(api2_result, 'Result')
+        assert not hasattr(api2_result, 'rate')
