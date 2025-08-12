@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  api2:
+    build:
+      context: ../../
+      dockerfile: services/api2/Dockerfile
+    ports:
+      - "8003:8003"
+    environment:
+      - LOG_LEVEL=INFO
+    restart: unless-stopped
+    networks:
+      - ratecompare-network
+
+networks:
+  ratecompare-network:
+    driver: bridge
