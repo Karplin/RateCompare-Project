@@ -123,8 +123,8 @@ class ExchangeService:
             api2_response: API2Response = await self.api2_provider.get_exchange_rate(api2_request)
             response_time = int((time.time() - start_time) * 1000)
 
-            converted_amount = api2_response.Result
-            rate = converted_amount / original_request.amount
+            rate = api2_response.Result
+            converted_amount = rate * original_request.amount
 
             return ExchangeResponse(
                 sourceCurrency=original_request.source_currency,

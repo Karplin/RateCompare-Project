@@ -4,7 +4,7 @@
 
 Este documento describe todos los casos de uso cubiertos por las pruebas unitarias.
 
-## 1. Pruebas del Servicio de Intercambio (`test_exchange_service.py`)
+## 1. Pruebas del Servicio de Intercambio (`tests/unit/test_exchange_service.py`)
 
 ### **Caso de Uso 1: Selección de Mejor Tasa**
 
@@ -51,7 +51,7 @@ Este documento describe todos los casos de uso cubiertos por las pruebas unitari
 - **Escenario**: Solicitar conversión AED → QAR (no soportada por ningún proveedor)
 - **Resultado Esperado**: ValueError con mensaje "All providers failed"
 
-## 2. Pruebas de Modelos de Datos (`test_models.py`)
+## 2. Pruebas de Modelos de Datos (`tests/unit/test_models.py`)
 
 ### **Caso de Uso 5: Creación Válida de Solicitud**
 
@@ -84,7 +84,7 @@ Este documento describe todos los casos de uso cubiertos por las pruebas unitari
 - **Escenario**: Usar monto -100.00
 - **Resultado Esperado**: ValidationError es lanzado
 
-## 3. Pruebas de Proveedores (`test_providers.py`)
+## 3. Pruebas de Proveedores (`tests/unit/test_providers.py`)
 
 ### **Caso de Uso 9: Funcionamiento API1 (Formato JSON)**
 

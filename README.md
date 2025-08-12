@@ -24,9 +24,9 @@ RateCompare-Project/
 │   │   ├── app/
 │   │   │   ├── api/endpoints.py    # Rutas del gateway
 │   │   │   └── main.py            # Aplicación FastAPI
-│   │   ├── Dockerfile             # Imagen específica
-│   │   ├── docker-compose.yml     # Despliegue individual
-│   │   └── requirements.txt       # Dependencias específicas
+│   │   ├── Dockerfile             # Imagen
+│   │   ├── docker-compose.yml     # Despliegue
+│   │   └── requirements.txt       # Dependencias
 │   ├── exchange-service/       # Servicio de comparación
 │   │   ├── app/
 │   │   │   ├── api/endpoints.py
@@ -58,9 +58,9 @@ RateCompare-Project/
 ├── common/                    # Código compartido entre servicios
 │   ├── models/               # Modelos Pydantic (request, response)
 │   ├── providers/            # Proveedores de APIs externas
-│   ├── services/             # Lógica de negocio compartida
+│   ├── services/             # Lógica de negocio
 │   ├── utils/                # Utilidades (logger, etc.)
-│   └── config/               # Configuración compartida
+│   └── config/               # Configuración
 
 ├── tests/                     # Pruebas unitarias
 ├── docker-compose.yml         # Orquestación completa
