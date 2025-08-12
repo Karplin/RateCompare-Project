@@ -1,8 +1,10 @@
 from decimal import Decimal
+
 import pytest
+
 from common.models.api_formats import (
     API1Request, API1Response,
-    API2Request, API2Response, 
+    API2Request, API2Response,
     API3Request, API3Response, API3ExchangeData
 )
 from common.providers.api1_provider import API1DirectProvider
@@ -15,7 +17,7 @@ def api1_sample_request():
     return API1Request(**{"from": "USD", "to": "EUR", "value": Decimal("100.00")})
 
 
-@pytest.fixture  
+@pytest.fixture
 def api2_sample_request():
     return API2Request(From="USD", To="EUR", Amount=Decimal("100.00"))
 
@@ -25,7 +27,7 @@ def api3_sample_request():
     return API3Request(
         exchange=API3ExchangeData(
             sourceCurrency="USD",
-            targetCurrency="EUR", 
+            targetCurrency="EUR",
             quantity=Decimal("100.00")
         )
     )
@@ -59,7 +61,7 @@ class TestDirectProviders:
     async def test_api3_direct_provider_success(self, api3_sample_request):
         """Test: API3 direct provider returns valid response in correct format."""
         provider = API3DirectProvider()
-        
+
         success = False
         for _ in range(10):
             try:
@@ -73,7 +75,7 @@ class TestDirectProviders:
                     break
             except Exception:
                 continue
-        
+
         assert success, "API3 should succeed at least once in 10 attempts"
 
     @pytest.mark.asyncio
@@ -91,10 +93,10 @@ class TestDirectProviders:
 
         with pytest.raises(ValueError):
             await api1_provider.get_exchange_rate(api1_request)
-            
+
         with pytest.raises(ValueError):
             await api2_provider.get_exchange_rate(api2_request)
-            
+
         with pytest.raises(ValueError):
             await api3_provider.get_exchange_rate(api3_request)
 

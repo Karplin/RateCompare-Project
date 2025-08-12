@@ -9,39 +9,10 @@ services:
       - "8000:8000"
     environment:
       - LOG_LEVEL=INFO
-      - API1_URL=http://api1:8002
-      - API2_URL=http://api2:8003
-      - API3_URL=http://api3:8004
-      - EXCHANGE_URL=http://exchange-service:8001
     restart: unless-stopped
-    depends_on:
-      - api1
-      - api2
-      - api3
-      - exchange-service
-    networks:
-      - ratecompare-network
-
-  api1:
-    image: ratecompare/api1:latest
-    networks:
-      - ratecompare-network
-
-  api2:
-    image: ratecompare/api2:latest
-    networks:
-      - ratecompare-network
-
-  api3:
-    image: ratecompare/api3:latest
-    networks:
-      - ratecompare-network
-
-  exchange-service:
-    image: ratecompare/exchange-service:latest
     networks:
       - ratecompare-network
 
 networks:
   ratecompare-network:
-    external: true
+    driver: bridge
